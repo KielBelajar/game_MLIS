@@ -1,6 +1,7 @@
 streamlit
 streamlit-webrtc
-cvzone
+opencv-python-headless
+cvzone --no-deps
 mediapipe
 av
 protobuf

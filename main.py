@@ -1,15 +1,3 @@
-import sys
-import subprocess
-
-# --- TRICK KHUSUS DEPLOY LINUX STREAMLIT CLOUD (PERBAIKAN ERROR GRAPHIC) ---
-# Memaksa instalasi opencv-python-headless jika dijalankan di Linux Server Streamlit
-if sys.platform.startswith('linux'):
-    try:
-        import cv2
-    except ImportError:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
-# --------------------------------------------------------------------------
-
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration, WebRtcMode
 import cvzone
@@ -65,7 +53,6 @@ class SnakeGameWeb:
         self.foodLocation = random.randint(100, 1100), random.randint(100, 600)
 
     def update(self, mainIMG, hand):
-        # Jika user menekan tombol EXIT, tampilkan layar penutup
         if self.exitGame:
             overlay = mainIMG.copy()
             cv2.rectangle(overlay, (0, 0), (1280, 720), (0, 0, 0), -1)
@@ -219,11 +206,9 @@ class GameVideoProcessor(VideoProcessorBase):
         self.game = SnakeGameWeb("Donut.png")
 
     def recv(self, frame):
-        # Konversi frame dari WebRTC ke format BGR OpenCV
         img = frame.to_ndarray(format="bgr24")
         img = cv2.flip(img, 1)  # Mode cermin
 
-        # Deteksi Tangan
         hands, img = self.detector.findHands(img, flipType=False)
 
         if hands:
@@ -231,7 +216,6 @@ class GameVideoProcessor(VideoProcessorBase):
         else:
             img = self.game.update(img, None)
 
-        # Kembalikan frame yang sudah digambar ke browser pemain
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 # 4. MEMULAI LIVE STREAMING WEBCAM DI WEBSITE
