@@ -201,26 +201,25 @@ class SnakeGameWeb:
 
 # 3. KELAS PROSESOR WEBRTC STREAMLIT
 
-# Gunakan cache agar MediaPipe hanya di-load 1 kali saja secara global, menghindari tabrakan EGL 0x3008
-@st.cache_resource
-def info_load_detector():
-    return HandDetector(detectionCon=0.8, maxHands=1)
-
-# Inisialisasi secara global
-detector_global = info_load_detector()
+# HAPUS bagian @st.cache_resource dan detector_global
+# Karena MediaPipe harus diinisialisasi di dalam thread WebRTC (lazy initialization)
 
 class GameVideoProcessor(VideoProcessorBase):
     def __init__(self):
-        # Hapus baris self.detector lama dari sini
         self.game = SnakeGameWeb("Donut.png")
+        self.detector = None # Siapkan variabel untuk detector
 
     def recv(self, frame):
+        # Inisialisasi HandDetector HANYA saat frame pertama kali diterima (berada di thread WebRTC)
+        if self.detector is None:
+            self.detector = HandDetector(detectionCon=0.8, maxHands=1)
+
         # Konversi frame dari WebRTC ke format BGR OpenCV
         img = frame.to_ndarray(format="bgr24")
         img = cv2.flip(img, 1)  # Mode cermin
 
-        # Deteksi Tangan menggunakan detector_global
-        hands, img = detector_global.findHands(img, flipType=False)
+        # Deteksi Tangan menggunakan self.detector
+        hands, img = self.detector.findHands(img, flipType=False)
 
         if hands:
             img = self.game.update(img, hands[0])
