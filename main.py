@@ -1,3 +1,15 @@
+import sys
+import subprocess
+
+# --- TRICK KHUSUS DEPLOY LINUX STREAMLIT CLOUD (PERBAIKAN ERROR GRAPHIC) ---
+# Memaksa instalasi opencv-python-headless jika dijalankan di Linux Server Streamlit
+if sys.platform.startswith('linux'):
+    try:
+        import cv2
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
+# --------------------------------------------------------------------------
+
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration, WebRtcMode
 import cvzone
