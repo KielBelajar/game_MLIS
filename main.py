@@ -210,15 +210,16 @@ class GameVideoProcessor(VideoProcessorBase):
         self.detector = None # Siapkan variabel untuk detector
 
     def recv(self, frame):
-        # Inisialisasi HandDetector HANYA saat frame pertama kali diterima (berada di thread WebRTC)
-        if self.detector is None:
-            self.detector = HandDetector(detectionCon=0.8, maxHands=1)
-
         # Konversi frame dari WebRTC ke format BGR OpenCV
         img = frame.to_ndarray(format="bgr24")
+        
+        # --- TAMBAHKAN BARIS INI: Paksa ukuran ke 1280x720 ---
+        img = cv2.resize(img, (1280, 720))
+        # -----------------------------------------------------
+        
         img = cv2.flip(img, 1)  # Mode cermin
 
-        # Deteksi Tangan menggunakan self.detector
+        # Deteksi Tangan
         hands, img = self.detector.findHands(img, flipType=False)
 
         if hands:
@@ -234,5 +235,10 @@ webrtc_streamer(
     mode=WebRtcMode.SENDRECV,
     rtc_configuration=RTC_CONFIGURATION,
     video_processor_factory=GameVideoProcessor,
-    async_processing=True,
+    async_processing=False,
+    # --- TAMBAHKAN BARIS INI: Meminta browser memakai resolusi 720p ---
+    media_stream_constraints={
+        "video": {"width": 1280, "height": 720}, 
+        "audio": False
+    },
 )
