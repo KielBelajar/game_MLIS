@@ -2,6 +2,6 @@ streamlit
 streamlit-webrtc
 opencv-python-headless
 cvzone
-mediapipe==0.10.14
+mediapipe==0.10.9
 av
 protobuf==3.20.3
